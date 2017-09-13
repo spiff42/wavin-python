@@ -42,7 +42,7 @@ class WavinAHC9000(minimalmodbus.Instrument):
 		if len(reply) != 1 + 2* num_regs:
 			raise ValueError('wrong reply length')
 		repl = bytearray(reply)
-		print("repl %d"%len(reply));
+		#print("repl %d"%len(reply));
 		regs = []
 		for i in range(num_regs):
 			v1 = int(repl[1+2*i])
