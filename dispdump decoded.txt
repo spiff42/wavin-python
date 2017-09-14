@@ -3669,7 +3669,13 @@ c5 e0
 03 43 02 20 01 0c 44
 03 43 04 00 01 01 84 87
 03 43 02 00 01 15 84
+// Poll status registers cat=0, idx=0, page=0, num regs=10
 03 43 00 00 00 0a c5 e0
+// Status reply, 0x14 bytes,
+// Element change flags ECF0=0000 ECF1=0000 ECF2=0000 ECF3=0000
+// Channel change flags CCFL=7ff4 CCFH=0000 
+// Packed data change flags PDCFL=0400 PDCFH=0000 
+// Status L=0000 H=0100 (CRC=d2 31)
 03 43 14 00 00 00 00 00 00 00 00 f4 7f 00 00 00 04 00 00 00 00 00 01 d2 31
 03 43 00 0d 00 03 94 25
 03 43 06 00 00 ff ff ff ff 3d b1
@@ -4829,67 +4835,170 @@ c8 00 d2 00 be 00 96 00 3c 00 fa 00 00 40 00 00 3c 01 90 00 dc 01 0e 00 1e 01 f4
 03 43 02 20 01 0c 44
 03 43 04 00 01 01 84 87
 03 43 02 00 01 15 84
+// Read 10 registers
 03 43 00 00 00 0a c5 e0
+// Response 0x14 bytes
+// ECHF0=0008 ECHF1=0000 ECHF2=0000 ECHF3=0000, element EL4
+// CHCFL=0000 CHCFH=0000 
+// PDCFL=0000 PDCFH=0000
+// STATL=0000 STATH=0001, ??? Is this RTC vaild flag?
 03 43 14 00 08 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 5d 8b
+
+// Read 3 regs
 03 43 00 0d 00 03 94 25
+// Last learned element index=0000, DHW sensor=FFFF, Inlet sensor=FFFF
 03 43 06 00 00 ff ff ff ff 3d b1
+
+// Read category 1=elements, index=4, page=3, length=11
 03 43 01 04 03 0b 44 ed
+// Return 11 regs=22 bytes
+// Air temp 22.2 (00de), floor temp 0000, dew pt 0000, rel humidity 0000,
+// status 8004, RSSI=0000, BAT Status=0000, Sync group=0000, live timer=000b,
+// ???=0000, ???=0000, CRC=3fb0
 03 43 16 00 de 00 00 00 00 00 00 80 04 00 00 00 00 00 00 00 0b 00 00 00 00 3f b0
+
+// Read category 4=relays, index=0, page=0
 03 43 04 00 00 01 85 17
+// 2 bytes, timer event=0x2001, IDLE_TIMER
 03 43 02 20 01 0c 44
+
+// Read category 4=relays, index=0, page=1
 03 43 04 00 01 01 84 87
+// 2 bytes, timer event=0x0001, IDLE_TIMER
 03 43 02 00 01 15 84
+
+// Read category 0=main, index=0, page=0, 10 registers
 03 43 00 00 00 0a c5 e0
+// Response 0x14 bytes
+// ECHF0=0000 ECHF1=0000 ECHF2=0000 ECHF3=0000
+// CHCFL=0000 CHCFH=0000 
+// PDCFL=0000 PDCFH=0000
+// STATL=0000 STATH=0001, ??? Is this RTC vaild flag?
 03 43 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 bf ea
+
+// Read category 0=main, index=0x0D, page=0, 3 regs
 03 43 00 0d 00 03 94 25
+// Last learned element index=0000, DHW sens=FFFF, Inlet sens=FFFF
 03 43 06 00 00 ff ff ff ff 3d b1
+
+// Read category 0=main, index=0, page=0
 03 43 00 00 00 16 c4 29
+// ECHF0=0000 ECHF1=0000 ECHF2=0000 ECHF3=0000
+// CHCFL=0000 CHCFH=0000 
+// PDCFL=0000 PDCFH=0000
+// STATL=0000 STATH=0001, ??? Is this RTC vaild flag?
+// Learn Mask L=0000 Learn mask H=0000, Learn channel=0000, Last learned elem idx=0000,
+// DHW sensor=ffff, inlet sensor=ffff, Total current L=0000 H=0000
+// R12 reserved=055d, R13 reserved=0ae4
+// DHW temp comfort=01c2 (45.0 deg), DHW temp eco=00fa (25.0 deg) CRC=d9a8
 03 43 2c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 ff ff ff ff 00 00 00 00 05 5d 0a e4 01 c2 00 fa d9 a8
+
+// Read category 0=main, index=0x16, page=0
 03 43 00 16 00 09 64 25
+// DHW temp cleaning=02bc (70.0 deg), DHW temp stby=0096 (15.0 deg),
+// DHW cleaning schedule=1080
+// High temp cut-off temp=028a (65.0 deg),
+// Auto kick-in temp=01c2 (45.0 deg), High temp cut off delay=003c (60)
+// Actuator activation interval=13b0 (5040 sec), duration=0258 (600sec), polarity=0000, CRC=60e0
 03 43 12 02 bc 00 96 10 80 02 8a 01 c2 00 3c 13 b0 02 58 00 00 60 e0
+
+// Read category 3=channels, index=0, page=0, regs=4
 03 43 03 00 00 04 44 60
+// CH0: Timer event=2121 (IDLE_TIMER)
+// Current consumption = 0000
+// Primary element index = 00c4 (idx=4, Party ena, holiday ena)
+// Timer = 13ad, CRC=e31d
 03 43 08 21 21 00 00 00 c4 13 ad e3 1d
+
 03 43 03 00 01 04 45 f0
+// CH1: idx=8, Party ena, holiday ena
 03 43 08 21 21 00 00 00 c8 13 ad 23 1e
+
 03 43 03 00 02 04 45 00
+// CH2: idx=10, Party ena, holiday ena
 03 43 08 21 21 00 00 00 ca 13 af 03 1f
+
 03 43 03 00 03 04 44 90
+// CH3: idx=2, Party ena, holiday ena
 03 43 08 21 21 00 00 00 c2 13 ad 03 1c
+
 03 43 03 00 04 04 46 a0
+// CH4: idx=1, Party ena, holiday ena
 03 43 08 21 21 00 00 00 c1 13 ad f3 1c
+
 03 43 03 00 05 04 47 30
+// CH5: idx=11, Party ena, holiday ena
 03 43 08 21 21 00 00 00 cb 13 ad d3 1e
+
 03 43 03 00 06 04 47 c0
+// CH6: idx=3, Party ena, holiday ena
 03 43 08 21 21 00 00 00 c3 13 ad 52 dc
+
 03 43 03 00 07 04 46 50
+// CH7: 
+// Timer event=2101 (TIMER_IDLE)
+// Current consumption=0000 
+// Primary element=40c8, Sched sync, idx=8, Party ena, holiday ena
+// Tiemr=13ad, CRC=171c
 03 43 08 21 01 00 00 40 c8 13 ad 17 1c
+
 03 43 03 00 08 04 43 a0
+// CH8: idx=8, Sched sync, Party ena, holiday ena
 03 43 08 21 01 00 00 40 c8 13 ad 17 1c
+
 03 43 03 00 09 04 42 30
+// CH9: idx=8, Sched sync, Party ena, holiday ena
 03 43 08 21 01 00 00 40 c8 13 ad 17 1c
+
 03 43 03 00 0a 04 42 c0
-03 43 08 21 21 00 00 00 cd 13 ad 33 1f 03
-43 03 00 0b 04 43 50
+// CH10: idx=13, Party ena, holiday ena
+03 43 08 21 21 00 00 00 cd 13 ad 33 1f
+
+03 43 03 00 0b 04 43 50
+// CH11: idx=12, Party ena, holiday ena
 03 43 08 21 21 00 00 00 cc 13 ad 62 df
+
 03 43 03 00 0c 04 41 60
+// CH12: idx=5, Party ena, holiday ena
 03 43 08 21 21 00 00 00 c5 13 ad b2 dd
+
 03 43 03 00 0d 04 40 f0
+// CH13: idx=9, Party ena, holiday ena
 03 43 08 21 21 00 00 00 c9 13 ad 72 de
+
 03 43 03 00 0e 04 40 00
+// CH14: idx=9, Party ena, holiday ena
 03 43 08 21 21 00 00 00 c7 13 ad 13 1d
+
 03 43 03 00 0f 04 41 90
+// CH15: idx=6, Party ena, holiday ena
 03 43 08 21 21 00 00 00 c6 13 50 83 5c
+
 03 43 03 00 10 04 49 a0
+// CH16: idx=0
 03 43 08 20 00 00 00 00 00 00 00 9e a3
+
+// Read element 00
 03 43 01 00 00 0f 04 1f
+// Element 0: ADDRL=3280, ADDRH=11d0, Assignment map L=0010, H=3900
+// Air temp=00d8 (21.6), floor temp=0000, dew pt=0000, rel hum=0000, status=8004, 
+// RSSI=0000, Bat status=0000, Sync group=0004, Live timer=000c, ??=0000, ??=0000, CRC=f9d1
 03 43 1e 32 80 11 d0 00 10 39 00 00 d8 00 00 00 00 00 00 80 04 00 00 00 00 00 04 00 0c 00 00 00 00 f9 d1
+
 03 43 01 00 01 0f 05 8f
+// Element 1: ADDR=11D03248, Map=39000008, Air temp=00d3 (21.1), sync group=3
 03 43 1e 32 48 11 d0 00 08 39 00 00 d3 00 00 00 00 00 00 80 04 00 00 00 00 00 03 00 0b 00 00 00 00 7e eb
+
 03 43 01 00 02 0f 05 7f
+// Element 2: ADDR=11D03244, Map=39000040, Air temp=00d7 (21.5), sync group=6
 03 43 1e 32 44 11 d0 00 40 39 00 00 d7 00 00 00 00 00 00 80 04 00 00 00 00 00 06 00 0b 00 00 00 00 92 f9
+
 03 43 01 00 03 0f 04 ef
+// Element 3: ADDR=11D0325C, Map=39000001, Air temp=00de (22.2), sync group=0
 03 43 1e 32 5c 11 d0 00 01 39 00 00 de 00 00 00 00 00 00 80 04 00 00 00 00 00 00 00 0b 00 00 00 00 6f 5e
+
 03 43 01 00 04 0f 06 df
+// Element 4: ADDR=11D0327C, Map=39001000, Air temp=00d2 (21.0), sync group=12
 03 43 1e 32 7c 11 d0 10 00 39 00 00 d2 00 00 00 00 00 00 80 04 00 00 00 00 00 0c 00 0b 00 00 00 00 af ac
 03 43 01 00 05 0f 07 4f
 03 43 1e 32 62 11 d0 80 00 39 00 00 d1 00 00 00 00 00 00 80 04 00 00 00 00 00 0f 00 0b 00 00 00 00 11 0a
