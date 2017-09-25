@@ -102,4 +102,84 @@ repl 35
  * Temperature offset = 0
  * Desired temperature = 20.0 deg C
 
+## Dumping communication with display
+
+Using serdump.py to dump communication between display and AHC9000:
+
+```
+[spiff@spiffsrv wavin]$ ./serdump.py
+02 43 00 00 00 0a c4 31 
+02 43 14 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 83 46 
+02 43 00 0d 00 03 95 f4
+02 43 06 00 00 ff ff ff ff 30 21
+02 43 01 04 02 0b 44 ac 
+02 43 16 00 d6 00 00 00 00 00 00 80 04 00 00 00 00 00 06 00 0b 00 00 00 00 84 01
+02 43 00 00 00 0a c4 31 
+02 43 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 72 76 02 43 00 0d 00 03 95 f4
+02 43 06 00 00 ff ff ff ff 30 21
+02 43 00 00 00 0a c4 31
+02 43 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 72 76 02 43 00 0d 00 03 95 f4 02 43 06 00 00 ff ff ff ff 30 21
+02 43 00 00 00 0a c4 31 02 43 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 72 76 02 43 00 0d 00 03 95 f4
+02 43 06 00 00 ff ff ff ff 30 21
+02 43 00 00 00 0a c4 31 02 43 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 72 76 02 43 00 0d 00 03 95 f4 02 43 06 00 00 ff ff ff ff 30 21
+02 43 00 00 00 0a c4 31 02 43 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 72 76 02 43 00 0d 00 03 95 f4
+02 43 06 00 00 ff ff ff ff 30 21
+^C
+```
+
+You need to adjust the serial device string.
+
+Notice that you cannot tell which way communication is going, except by looking
+at the messages. The ```serdump.py``` application is not good at breaking the
+lines correctly, so I suggest you do that first. Commands and replies both
+start with the slave address, follow by the command - 0x4? for Wavin. 
+For example above the commands sent by the display are all 0x43 (Read register
+from index) and sent to address 0x02, so both request and reply starts with
+```02 43```. In the output above, I have inserted line breaks in the first
+half of the data.
+
+To decode the message, look at chapter 4 on the Wavin Modbus Specification 
+PDF. E.g. command 0x43 Read Register from Index is described on page 34.
+Remember that the lower level modbus protocol describes that the first byte
+is the modbus address (02 above), and the last two bytes are the CRC of the
+message. These are not shown in the command descriptions in the Wavin
+modbus specification.
+
+So the first request above 
+
+```
+02 43 00 00 00 0a c4 31
+```
+
+is sent to modbus address 02, Read Register from Index (43), category 00 
+(main category), Start Index 00, Register page 00, quantity of registers 
+0x0A = 10.
+
+The reply
+
+```
+02 43 14 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 83 46
+```
+
+decodes as reply from modbus address 02, Read Register from Index (43),
+number of bytes 0x14 = 20 bytes (10 registers). The decoded register values:
+
+```
+reg 00: 0004 (Element change flags 0)
+reg 01: 0000 (Element change flags 1)
+reg 02: 0000 (Element change flags 2)
+reg 03: 0000 (Element change flags 3)
+reg 04: 0000 (Channel change flags L)
+reg 05: 0000 (Channel change flags H)
+reg 06: 0000 (Packed data change flags L)
+reg 07: 0000 (Packed data change flags H)
+reg 08: 0000 (Status L)
+reg 09: 0001 (Status H)
+```
+
+Some things are not entirely consistent with the documentation. Why read status
+H if it is reserved and does not contain any useful information? Maybe the
+register map is incorrect and status L and status H are swapped (meaning the
+0001 would indicate RTC valid). Need further investigation.
+
 
