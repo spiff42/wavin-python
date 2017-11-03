@@ -37,6 +37,7 @@ class WavinAHC9000(minimalmodbus.Instrument):
 		functioncode = 0x43
 		payload = "".join(map(chr, bytearray([category, index, page, num_regs])))
 		request = minimalmodbus._embedPayload(self.address, self.mode, functioncode, payload)
+		self.serial.reset_input_buffer() # Avoid getting out of sync
 		response = self._communicate(request, 3 + 2*num_regs + 2)
 		reply = minimalmodbus._extractPayload(response, self.address, self.mode, functioncode)		
 		if len(reply) != 1 + 2* num_regs:
@@ -61,6 +62,7 @@ class WavinAHC9000(minimalmodbus.Instrument):
 			ba.append(v & 0xFF)
 		payload = "".join(map(chr, ba))
 		request = minimalmodbus._embedPayload(self.address, self.mode, functioncode, payload)
+		self.serial.reset_input_buffer() # Avoid getting out of sync
 		response = self._communicate(request, 3 + 2*num_regs + 2)
 		reply = minimalmodbus._extractPayload(response, self.address, self.mode, functioncode)		
 			

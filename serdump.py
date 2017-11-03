@@ -2,7 +2,8 @@
 
 import serial
 
-ser = serial.Serial('/dev/tty-wavin-modbus', 38400, timeout=0.05)
+#ser = serial.Serial('/dev/tty-wavin-modbus', 38400, timeout=0.05)
+ser = serial.Serial('/dev/ttyUSB2', 38400, timeout=0.05)
 
 while True:
 	st = ser.read(100)
